@@ -2,13 +2,9 @@
 for chrome: --allow-file-access-from-files
 */
 
-
-
 const shapes = {
 
 };
-
-
 
 const processor = {
 	load(video) {
@@ -23,11 +19,20 @@ const processor = {
 	
 	},
 	frame() {
-		//this.ctx.drawImage(this.video, 0, 0, this.width, this.height);
+		this.ctx.drawImage(this.video, 0, 0, this.width, this.height);
 		let userImageData = this.ctx.getImageData(0, 0, this.width, this.height);
-		//let myObject = createTemplate(userImageData.data,240,148,userImageData.width,userImageData.height,mask);
-		//this.ctx.drawImage(myObject.data,0, 0, myObject.width, myObject.height);
-		
+		let myObject = createTemplate(userImageData.data,240,148,userImageData.width,userImageData.height,mask);
+		var imgData=this.ctx.createImageData(myObject.width,myObject.height);
+		//imgData.data = myObject.data.splice();
+		for (var i=0;i<imgData.data.length;i+=4)
+  			{
+  				imgData.data[i+0] = myObject.data[i];
+  				imgData.data[i+1]= myObject.data[i+1];
+  				imgData.data[i+2]= myObject.data[i+2];
+  				imgData.data[i+3]= myObject.data[i+3];
+  			}
+		//console.log(imgData.data)
+		this.ctx.putImageData(imgData,imgData.width,imgData.height);
 	},
 	timer() {
 		if (this.video.paused || this.video.ended) {
@@ -37,7 +42,7 @@ const processor = {
 		let self = this;
 		setTimeout(function () {
 			self.timer();
-		}, 5000);
+		}, 10000);
 	}
 };
 
@@ -57,8 +62,6 @@ if (navigator.mediaDevices !== undefined && navigator.mediaDevices.getUserMedia 
 } else {
     // Brak obsługi kamery przez przeglądarke
 }
-
-
 
 function createMask(imgdata, width, height) {
 	let data = [];
