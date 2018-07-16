@@ -8,7 +8,10 @@ const shapes = {
 
 };
 
+const EXTRACTION = 1;
+const ANALYSIS = 2;
 const processor = {
+	mode: EXTRACTION,
 	load(video) {
 		this.video = video;
 		this.width = video.videoWidth;
@@ -18,24 +21,34 @@ const processor = {
 		this.canvas.height = this.height;
 		document.body.appendChild(this.canvas);
 		this.ctx = this.canvas.getContext('2d');
-	
 	},
 	frame() {
 		this.ctx.drawImage(this.video, 0, 0, this.width, this.height);
-		//if(check){
-		//this.ctx.putImageData(imgData,0,0);}
 	},
 	timer() {
 		if (this.video.paused || this.video.ended) {
       		return;
     	}
-		this.frame();
 		let self = this;
-		setTimeout(function () {
-			self.timer();
-		}, 1000);
+		if (this.mode === EXTRACTION) {
+			setTimeout(() => {
+				self.frame();
+				self.template();
+				self.mode = ANALYSIS;
+				self.timer();
+			}, 5500);
+		} else if (this.mode === ANALYSIS) {
+			setTimeout(() => {
+				self.frame();
+				setTimeout(() => {
+					self.analyzeImage();
+					//self.timer();
+				}, 1000);
+			}, 3000);
+		}
 	},
-	template(){
+	template() {
+		console.log('Getting template...');
 		this.userImageData = this.ctx.getImageData(0, 0, this.width, this.height);
 		templateImage = createTemplate(this.userImageData.data, 240, 148, this.userImageData.width, this.userImageData.height, mask);
 		imgData = this.ctx.createImageData(templateImage.width, templateImage.height);
@@ -47,12 +60,11 @@ const processor = {
 				imgData.data[i+2] = templateImage.data[i+2];
 				imgData.data[i+3] = templateImage.data[i+3];
   			}
-	
-		this.ctx.putImageData(imgData,0,0);
+		console.log('... finished.');
 	},
 	analyzeImage(){
 		let userImageData2 = this.ctx.getImageData(0, 0, this.width, this.height);
-		
+		console.log('Analysing...');
 		console.time('total');
 		let best = { x: null, y: null, value: 999999999 };
 		for (let y = 0; y < userImageData2.height - templateImage.height + 1; ++y) {
@@ -63,7 +75,10 @@ const processor = {
 				}
 			}
 		}
+		this.ctx.fillStyle = 'green';
+		this.ctx.fillRect(best.x, best.y, templateImage.width, templateImage.height);
 		console.timeEnd('total');
+		console.log('...finished.');
 		console.log(best);
 	}
 };
@@ -76,8 +91,6 @@ if (navigator.mediaDevices !== undefined && navigator.mediaDevices.getUserMedia 
 	        video.onloadedmetadata = function (event) {
 				processor.load(this);
 				processor.timer();
-				setTimeout(function(){processor.template();},5500);
-				setTimeout(function(){processor.analyzeImage();},8500);
 	        };
 		})
 		.catch(function (err) {
