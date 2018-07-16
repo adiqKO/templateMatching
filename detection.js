@@ -1,7 +1,9 @@
 /*
 for chrome: --allow-file-access-from-files
 */
-
+let templateImage;
+let imgData;
+let check = false;
 const shapes = {
 
 };
@@ -20,19 +22,8 @@ const processor = {
 	},
 	frame() {
 		this.ctx.drawImage(this.video, 0, 0, this.width, this.height);
-		let userImageData = this.ctx.getImageData(0, 0, this.width, this.height);
-		let myObject = createTemplate(userImageData.data,240,148,userImageData.width,userImageData.height,mask);
-		var imgData=this.ctx.createImageData(myObject.width,myObject.height);
-	
-		for (var i=0;i<imgData.data.length;i+=4)
-  			{
-  				imgData.data[i+0] = myObject.data[i];
-  				imgData.data[i+1]= myObject.data[i+1];
-  				imgData.data[i+2]= myObject.data[i+2];
-  				imgData.data[i+3]= myObject.data[i+3];
-  			}
-	
-		this.ctx.putImageData(imgData,imgData.width,imgData.height);
+		//if(check){
+		//this.ctx.putImageData(imgData,0,0);}
 	},
 	timer() {
 		if (this.video.paused || this.video.ended) {
@@ -42,7 +33,38 @@ const processor = {
 		let self = this;
 		setTimeout(function () {
 			self.timer();
-		}, 10000);
+		}, 1000);
+	},
+	template(){
+		this.userImageData = this.ctx.getImageData(0, 0, this.width, this.height);
+		templateImage = createTemplate(this.userImageData.data, 240, 148, this.userImageData.width, this.userImageData.height, mask);
+		imgData = this.ctx.createImageData(templateImage.width, templateImage.height);
+		check = true;
+		for (var i=0;i<imgData.data.length;i+=4)
+  			{
+				imgData.data[i+0] = templateImage.data[i];
+				imgData.data[i+1] = templateImage.data[i+1];
+				imgData.data[i+2] = templateImage.data[i+2];
+				imgData.data[i+3] = templateImage.data[i+3];
+  			}
+	
+		this.ctx.putImageData(imgData,0,0);
+	},
+	analyzeImage(){
+		let userImageData2 = this.ctx.getImageData(0, 0, this.width, this.height);
+		
+		console.time('total');
+		let best = { x: null, y: null, value: 999999999 };
+		for (let y = 0; y < userImageData2.height - templateImage.height + 1; ++y) {
+			for (let x = 0; x <userImageData2.width - templateImage.width + 1; ++x) {
+				let value = calculateSqDiff(userImageData2.data, x, y, userImageData2.width, userImageData2.height, templateImage, mask, best);
+				if (best.x === null || value < best.value) {
+					best = { x: x, y: y, value: value };
+				}
+			}
+		}
+		console.timeEnd('total');
+		console.log(best);
 	}
 };
 
@@ -54,6 +76,8 @@ if (navigator.mediaDevices !== undefined && navigator.mediaDevices.getUserMedia 
 	        video.onloadedmetadata = function (event) {
 				processor.load(this);
 				processor.timer();
+				setTimeout(function(){processor.template();},5500);
+				setTimeout(function(){processor.analyzeImage();},8500);
 	        };
 		})
 		.catch(function (err) {
@@ -61,7 +85,7 @@ if (navigator.mediaDevices !== undefined && navigator.mediaDevices.getUserMedia 
 		});
 } else {
     // Brak obsługi kamery przez przeglądarke
-}
+};
 
 function createMask(imgdata, width, height) {
 	let data = [];
@@ -91,7 +115,7 @@ function calculateSqDiff(imgdata, xOffset, yOffset, width, height, template, mas
 	for (let y = 0; y < template.height; ++y) {
 		for (let x = 0; x < template.width; ++x) {
 			let m = (y * template.width + x);
-			let i = m * 3;
+			let i = m * 4;
 			let j = ((y + yOffset) * width + (x + xOffset)) * 4;
 			if (mask.data[m] === 1) {
 				sum += Math.pow(template.data[i] - imgdata[j] + template.data[i + 1] - imgdata[j + 1] + template.data[i + 2] - imgdata[j + 2], 2);
