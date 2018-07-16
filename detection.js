@@ -23,7 +23,7 @@ const processor = {
 		let userImageData = this.ctx.getImageData(0, 0, this.width, this.height);
 		let myObject = createTemplate(userImageData.data,240,148,userImageData.width,userImageData.height,mask);
 		var imgData=this.ctx.createImageData(myObject.width,myObject.height);
-		//imgData.data = myObject.data.splice();
+	
 		for (var i=0;i<imgData.data.length;i+=4)
   			{
   				imgData.data[i+0] = myObject.data[i];
@@ -31,7 +31,7 @@ const processor = {
   				imgData.data[i+2]= myObject.data[i+2];
   				imgData.data[i+3]= myObject.data[i+3];
   			}
-		//console.log(imgData.data)
+	
 		this.ctx.putImageData(imgData,imgData.width,imgData.height);
 	},
 	timer() {
@@ -77,9 +77,9 @@ function createTemplate(imgdata, xOffset, yOffset, width, height, mask) {
 			let i = y * mask.width + x;
 			let j = ((y + yOffset) * width + (x + xOffset)) * 4;
 			if (mask.data[i] === 1) {
-				data.push(imgdata[j], imgdata[j + 1], imgdata[j + 2]);
+				data.push(imgdata[j], imgdata[j + 1], imgdata[j + 2], 255);
 			} else {
-				data.push(255, 255, 255);
+				data.push(255, 255, 255, 255);
 			}
 		}
 	}
