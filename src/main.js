@@ -47,7 +47,6 @@ const templateService = {
             }
         }
         templates[this.current].template = data;
-        ctx.putImageData(data, 0, 0, width, height);
 		console.log('... finished.');
         this.current++;
         return this.current < templates.length ? false : true;
@@ -96,7 +95,8 @@ const processor = {
             templateService.outline();
 			setTimeout(() => {
 				self.frame();
-				if (self.read(this.ctx)) {
+				if (templateService.read(this.ctx)) {
+                    console.log(templates);
                     self.mode = ANALYSIS;
                 }
 				self.timer();
