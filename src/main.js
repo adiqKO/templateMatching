@@ -69,7 +69,7 @@ const processor = {
             templateService.outline();
 			setTimeout(() => {
 				self.frame();
-				self.template(); // todo
+				//self.template(); // todo
 				self.mode = ANALYSIS;
 				self.timer();
 			}, 5000);
@@ -77,7 +77,7 @@ const processor = {
 			setTimeout(() => {
 				self.frame();
 				setTimeout(() => {
-					self.analyzeImage(); // todo
+					//self.analyzeImage(); // todo
 				}, 1000);
 			}, 3000);
 		}
