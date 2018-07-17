@@ -23,7 +23,9 @@ const templateService = {
         const el = document.getElementById('outline');
         el.style.marginLeft = '-' + (templates[this.current].width / 2) + 'px';
         el.style.marginTop = '-' + (templates[this.current].height / 2) + 'px';
-        el.style.backgroundImage = templates[this.current].outlineUrl;
+        el.style.width = templates[this.current].width + 'px';
+        el.style.height = templates[this.current].height + 'px';
+        el.style.background = 'url(' + templates[this.current].outlineUrl + ') no-repeat transparent';
     }
 };
 
@@ -36,8 +38,8 @@ const processor = {
                     const video = document.querySelector('video');
                     video.src = window.URL.createObjectURL(stream);
                     video.onloadedmetadata = function (event) {
-                        this.load(this);
-                        this.timer();
+                        processor.load(this);
+                        processor.timer();
                     };
                 })
                 .catch(function (err) {
