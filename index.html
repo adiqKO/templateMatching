@@ -22,11 +22,17 @@
 			height: 184px;
 			z-index: 1000;
 		}
+        video{
+            transform: rotateY(180deg);
+            -webkit-transform:rotateY(180deg); /* Safari and Chrome */
+            -moz-transform:rotateY(180deg); /* Firefox */
+        }
     </style>
 </head>
 <body>
     <video autoplay></video>
     <div class="hand-outline"></div>
+    <script src="maskArray0.5.js"></script>
     <script src="maskArray.js"></script>
     <script src="detection.js"></script>
 </body>

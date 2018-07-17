@@ -47,22 +47,28 @@ const processor = {
 	template() {
 		console.log('Getting template...');
 		this.userImageData = this.ctx.getImageData(0, 0, this.width, this.height);
-		templateImage = createTemplate(this.userImageData.data, 240, 148, this.userImageData.width, this.userImageData.height, mask);
+		templateImage = createTemplate(this.userImageData.data, 240, 148, this.userImageData.width, this.userImageData.height, mask2);
+		console.log(templateImage.data);
+		templateImage = scaleImage(templateImage.data, templateImage.width, templateImage.height, 80,92);
+		console.log(templateImage.data);
 		console.log('... finished.');
 	},
 	analyzeImage(){
 		let userImageData2 = this.ctx.getImageData(0, 0, this.width, this.height);
+		console.log(userImageData2.data);
+		userImageData2 = scaleImage(userImageData2.data, userImageData2.width, userImageData2.height, 320, 240);
+		console.log(userImageData2.data);
 		console.log('Analysing...');
 		console.time('total');
 		let best = { x: null, y: null, value: 999999999 };
-		for (let y = 0; y < userImageData2.height - templateImage.height + 1; ++y) {
+		/*for (let y = 0; y < userImageData2.height - templateImage.height + 1; ++y) {
 			for (let x = 0; x <userImageData2.width - templateImage.width + 1; ++x) {
 				let value = calculateSqDiff(userImageData2.data, x, y, userImageData2.width, userImageData2.height, templateImage, mask, best);
 				if (best.x === null || value < best.value) {
 					best = { x: x, y: y, value: value };
 				}
 			}
-		}
+		}*/
 		this.ctx.fillStyle = 'green';
 		this.ctx.fillRect(best.x, best.y, templateImage.width, templateImage.height);
 		console.timeEnd('total');
@@ -116,9 +122,9 @@ function calculateSqDiff(imgdata, xOffset, yOffset, width, height, template, mas
 	for (let y = 0; y < template.height; ++y) {
 		for (let x = 0; x < template.width; ++x) {
 			let m = (y * template.width + x);
-			let i = m * 4;
-			let j = ((y + yOffset) * width + (x + xOffset)) * 4;
 			if (mask.data[m] === 1) {
+				let i = m * 4;
+				let j = ((y + yOffset) * width + (x + xOffset)) * 4;
 				sum += Math.pow(template.data[i] - imgdata[j] + template.data[i + 1] - imgdata[j + 1] + template.data[i + 2] - imgdata[j + 2], 2);
 				if (sum > best.value || sum > 100000000) {
 					return 999999999;
@@ -127,4 +133,24 @@ function calculateSqDiff(imgdata, xOffset, yOffset, width, height, template, mas
 		}
 	}
 	return sum;
+};
+
+let out = [];
+
+function scaleImage(imgData, w1, h1, w2, h2){
+	scaleX = ((w1<<16)/w2)+1;
+	scaleY = ((h1<<16)/h2)+1;
+
+	for(let j = 0; j < h2; j++){
+		for(let i = 0; i < w2; i++){
+			px = ((i*scaleX)>>16);
+			py = ((j*scaleY)>>16);
+			idx = (py * w1 + px)*4;
+			out.push(imgData[idx]);
+			out.push(imgData[idx+1]);
+			out.push(imgData[idx+2]);
+			out.push(imgData[idx+3]);
+		}
+	}
+	return { width: w2, height: h2, data: out };
 };
