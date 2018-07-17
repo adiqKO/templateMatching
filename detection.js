@@ -2,8 +2,6 @@
 for chrome: --allow-file-access-from-files
 */
 let templateImage;
-let imgData;
-let check = false;
 const shapes = {
 
 };
@@ -42,7 +40,6 @@ const processor = {
 				self.frame();
 				setTimeout(() => {
 					self.analyzeImage();
-					//self.timer();
 				}, 1000);
 			}, 3000);
 		}
@@ -51,15 +48,6 @@ const processor = {
 		console.log('Getting template...');
 		this.userImageData = this.ctx.getImageData(0, 0, this.width, this.height);
 		templateImage = createTemplate(this.userImageData.data, 240, 148, this.userImageData.width, this.userImageData.height, mask);
-		imgData = this.ctx.createImageData(templateImage.width, templateImage.height);
-		check = true;
-		for (var i=0;i<imgData.data.length;i+=4)
-  			{
-				imgData.data[i+0] = templateImage.data[i];
-				imgData.data[i+1] = templateImage.data[i+1];
-				imgData.data[i+2] = templateImage.data[i+2];
-				imgData.data[i+3] = templateImage.data[i+3];
-  			}
 		console.log('... finished.');
 	},
 	analyzeImage(){
