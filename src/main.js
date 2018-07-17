@@ -26,6 +26,31 @@ const templateService = {
         el.style.width = templates[this.current].width + 'px';
         el.style.height = templates[this.current].height + 'px';
         el.style.background = 'url(' + templates[this.current].outlineUrl + ') no-repeat transparent';
+    },
+    read(ctx) {
+        console.log('Getting template [' + templates[this.current].name + ']...');
+        const width = templates[this.current].width;
+        const height = templates[this.current].height;
+		const imgdata = ctx.getImageData(0, 0, width, height);
+        let data = [];
+        const xOffset = parseInt(imgdata.width / 2 - width / 2);
+        const yOffset = parseInt(imgdata.height / 2 - height / 2);
+        for (let y = 0; y < height; ++y) {
+            for (let x = 0; x < width; ++x) {
+                let i = y * width + x;
+                let j = ((y + yOffset) * width + (x + xOffset)) * 4;
+                if (templates[this.current].mask[i] === 1) {
+                    data.push(imgdata.data[j], imgdata.data[j + 1], imgdata.data[j + 2], 255);
+                } else {
+                    data.push(255, 255, 255, 255);
+                }
+            }
+        }
+        templates[this.current].template = data;
+        ctx.putImageData(data, 0, 0, width, height);
+		console.log('... finished.');
+        this.current++;
+        return this.current < templates.length ? false : true;
     }
 };
 
@@ -71,8 +96,9 @@ const processor = {
             templateService.outline();
 			setTimeout(() => {
 				self.frame();
-				//self.template(); // todo
-				self.mode = ANALYSIS;
+				if (self.read(this.ctx)) {
+                    self.mode = ANALYSIS;
+                }
 				self.timer();
 			}, 5000);
 		} else if (this.mode === ANALYSIS) {
