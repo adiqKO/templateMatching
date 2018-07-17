@@ -41,7 +41,7 @@ const processor = {
                     };
                 })
                 .catch(function (err) {
-                    console.log('A input device error.');
+                    console.log('An input device error.');
                 });
         } else {
             console.log('Your browser is too old.');
