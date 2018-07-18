@@ -1,7 +1,6 @@
 /*
 for chrome: --allow-file-access-from-files
 */
-let templateImage;
 const shapes = {
 
 };
@@ -46,9 +45,9 @@ const processor = {
 	},
 	template() {
 		console.log('Getting template...');
-		let userImageData = this.ctx.getImageData(0, 0, this.width, this.height);
-		templateImage = createTemplate(userImageData.data, 240, 148, userImageData.width, userImageData.height, mask2);
-		templateImage = scaleImage(templateImage.data, templateImage.width, templateImage.height, 80,92);
+		this.userImageData = this.ctx.getImageData(0, 0, this.width, this.height);
+		this.templateImage = createTemplate(this.userImageData.data, 240, 148, this.userImageData.width, this.userImageData.height, mask2);
+		this.templateImage = scaleImage(this.templateImage.data, this.templateImage.width, this.templateImage.height, 80,92);
 		console.log('... finished.');
 	},
 	analyzeImage(){
@@ -58,16 +57,16 @@ const processor = {
 		console.log('Analysing...');
 		console.time('total');
 		let best = { x: null, y: null, value: 999999999 };
-		for (let y = 0; y < userImageData2.height - templateImage.height + 1; ++y) {
-			for (let x = 0; x <userImageData2.width - templateImage.width + 1; ++x) {
-				let value = calculateSqDiff(userImageData2.data, x, y, userImageData2.width, userImageData2.height, templateImage, mask, best);
+		for (let y = 0; y < userImageData2.height - this.templateImage.height + 1; ++y) {
+			for (let x = 0; x <userImageData2.width - this.templateImage.width + 1; ++x) {
+				let value = calculateSqDiff(userImageData2.data, x, y, userImageData2.width, userImageData2.height, this.templateImage, mask, best);
 				if (best.x === null || value < best.value) {
 					best = { x: x, y: y, value: value };
 				}
 			}
 		}
 		this.ctx.fillStyle = 'green';
-		this.ctx.fillRect(best.x*2, best.y*2, templateImage.width*2, templateImage.height*2);
+		this.ctx.fillRect(best.x*2, best.y*2, this.templateImage.width*2, this.templateImage.height*2);
 		console.timeEnd('total');
 		console.log('...finished.');
 		console.log(best);
