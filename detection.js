@@ -47,26 +47,26 @@ const processor = {
 		console.log('Getting template...');
 		this.userImageData = this.ctx.getImageData(0, 0, this.width, this.height);
 		this.templateImage = createTemplate(this.userImageData.data, 240, 148, this.userImageData.width, this.userImageData.height, mask2);
-		this.templateImage = scaleImage(this.templateImage.data, this.templateImage.width, this.templateImage.height, 80,92);
+		this.templateImage = scaleImage(this.templateImage.data, this.templateImage.width, this.templateImage.height, 40,46);
 		console.log('... finished.');
 	},
 	analyzeImage(){
 		let userImageData2 = this.ctx.getImageData(0, 0, this.width, this.height);
-		userImageData2 = scaleImage(userImageData2.data, userImageData2.width, userImageData2.height, 320, 240);
- 	
+		userImageData2 = scaleImage(userImageData2.data, userImageData2.width, userImageData2.height, 160, 120);
+
 		console.log('Analysing...');
 		console.time('total');
 		let best = { x: null, y: null, value: 999999999 };
 		for (let y = 0; y < userImageData2.height - this.templateImage.height + 1; ++y) {
 			for (let x = 0; x <userImageData2.width - this.templateImage.width + 1; ++x) {
-				let value = calculateSqDiff(userImageData2.data, x, y, userImageData2.width, userImageData2.height, this.templateImage, mask, best);
+				let value = calculateSqDiff(userImageData2.data, x, y, userImageData2.width, userImageData2.height, this.templateImage, mask3, best);
 				if (best.x === null || value < best.value) {
 					best = { x: x, y: y, value: value };
 				}
 			}
 		}
 		this.ctx.fillStyle = 'green';
-		this.ctx.fillRect(best.x*2, best.y*2, this.templateImage.width*2, this.templateImage.height*2);
+		this.ctx.fillRect(best.x*4, best.y*4, this.templateImage.width*4, this.templateImage.height*4);
 		console.timeEnd('total');
 		console.log('...finished.');
 		console.log(best);
