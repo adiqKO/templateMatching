@@ -46,31 +46,28 @@ const processor = {
 	},
 	template() {
 		console.log('Getting template...');
-		this.userImageData = this.ctx.getImageData(0, 0, this.width, this.height);
-		templateImage = createTemplate(this.userImageData.data, 240, 148, this.userImageData.width, this.userImageData.height, mask2);
-		console.log(templateImage.data);
+		let userImageData = this.ctx.getImageData(0, 0, this.width, this.height);
+		templateImage = createTemplate(userImageData.data, 240, 148, userImageData.width, userImageData.height, mask2);
 		templateImage = scaleImage(templateImage.data, templateImage.width, templateImage.height, 80,92);
-		console.log(templateImage.data);
 		console.log('... finished.');
 	},
 	analyzeImage(){
 		let userImageData2 = this.ctx.getImageData(0, 0, this.width, this.height);
-		console.log(userImageData2.data);
 		userImageData2 = scaleImage(userImageData2.data, userImageData2.width, userImageData2.height, 320, 240);
-		console.log(userImageData2.data);
+ 	
 		console.log('Analysing...');
 		console.time('total');
 		let best = { x: null, y: null, value: 999999999 };
-		/*for (let y = 0; y < userImageData2.height - templateImage.height + 1; ++y) {
+		for (let y = 0; y < userImageData2.height - templateImage.height + 1; ++y) {
 			for (let x = 0; x <userImageData2.width - templateImage.width + 1; ++x) {
 				let value = calculateSqDiff(userImageData2.data, x, y, userImageData2.width, userImageData2.height, templateImage, mask, best);
 				if (best.x === null || value < best.value) {
 					best = { x: x, y: y, value: value };
 				}
 			}
-		}*/
+		}
 		this.ctx.fillStyle = 'green';
-		this.ctx.fillRect(best.x, best.y, templateImage.width, templateImage.height);
+		this.ctx.fillRect(best.x*2, best.y*2, templateImage.width*2, templateImage.height*2);
 		console.timeEnd('total');
 		console.log('...finished.');
 		console.log(best);
@@ -135,21 +132,20 @@ function calculateSqDiff(imgdata, xOffset, yOffset, width, height, template, mas
 	return sum;
 };
 
-let out = [];
-
-function scaleImage(imgData, w1, h1, w2, h2){
+function scaleImage(imgDataScal, w1, h1, w2, h2){
+	let out =[];
 	scaleX = ((w1<<16)/w2)+1;
 	scaleY = ((h1<<16)/h2)+1;
-
+	let px,py;
 	for(let j = 0; j < h2; j++){
 		for(let i = 0; i < w2; i++){
 			px = ((i*scaleX)>>16);
 			py = ((j*scaleY)>>16);
 			idx = (py * w1 + px)*4;
-			out.push(imgData[idx]);
-			out.push(imgData[idx+1]);
-			out.push(imgData[idx+2]);
-			out.push(imgData[idx+3]);
+			out.push(imgDataScal[idx]);
+			out.push(imgDataScal[idx+1]);
+			out.push(imgDataScal[idx+2]);
+			out.push(imgDataScal[idx+3]);
 		}
 	}
 	return { width: w2, height: h2, data: out };
