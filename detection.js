@@ -33,14 +33,17 @@ const processor = {
 				self.template();
 				self.mode = ANALYSIS;
 				self.timer();
-			}, 5500);
+			}, 4000);
 		} else if (this.mode === ANALYSIS) {
 			setTimeout(() => {
 				self.frame();
 				setTimeout(() => {
 					self.analyzeImage();
-				}, 1000);
-			}, 3000);
+					setTimeout(() => {
+						self.timer();
+					}, 10);
+				}, 290);
+			}, 700);
 		}
 	},
 	template() {
@@ -48,6 +51,18 @@ const processor = {
 		this.userImageData = this.ctx.getImageData(0, 0, this.width, this.height);
 		this.templateImage = createTemplate(this.userImageData.data, 240, 148, this.userImageData.width, this.userImageData.height, mask2);
 		this.templateImage = scaleImage(this.templateImage.data, this.templateImage.width, this.templateImage.height, 40,46);
+		
+		let canvas = document.createElement('canvas');
+        canvas.width  = this.templateImage.width;
+		canvas.height = this.templateImage.height;
+		let context = canvas.getContext('2d');
+		context.putImageData(new ImageData(
+			Uint8ClampedArray.from(this.templateImage.data),
+			this.templateImage.width,
+			this.templateImage.height
+		), 0, 0);
+		document.body.appendChild(canvas);
+
 		console.log('... finished.');
 	},
 	analyzeImage(){
@@ -66,6 +81,7 @@ const processor = {
 			}
 		}
 		this.ctx.fillStyle = 'green';
+		
 		this.ctx.fillRect(best.x*4, best.y*4, this.templateImage.width*4, this.templateImage.height*4);
 		console.timeEnd('total');
 		console.log('...finished.');
@@ -101,7 +117,7 @@ function createTemplate(imgdata, xOffset, yOffset, width, height, mask) {
 	let data = [];
 	for (let y = 0; y < mask.height; ++y) {
 		for (let x = 0; x < mask.width; ++x) {
-			let i = y * mask.width + x;
+			let i = y * mask.width + mask.width - x - 1;
 			let j = ((y + yOffset) * width + (x + xOffset)) * 4;
 			if (mask.data[i] === 1) {
 				data.push(imgdata[j], imgdata[j + 1], imgdata[j + 2], 255);
