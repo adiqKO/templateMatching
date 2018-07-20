@@ -39,18 +39,18 @@ const processor = {
 				self.frame();
 				setTimeout(() => {
 					self.analyzeImage();
+					
 					setTimeout(() => {
-						self.timer();
+					//	self.timer();
 					}, 10);
-				}, 290);
-			}, 700);
+				}, 300);
+			}, 2000);
 		}
 	},
 	template() {
 		console.log('Getting template...');
 		this.userImageData = this.ctx.getImageData(0, 0, this.width, this.height);
 		this.templateImage = createTemplate(this.userImageData.data, 240, 148, this.userImageData.width, this.userImageData.height, mask2);
-		this.templateImage = scaleImage(this.templateImage.data, this.templateImage.width, this.templateImage.height, 40,46);
 		
 		let canvas = document.createElement('canvas');
         canvas.width  = this.templateImage.width;
@@ -63,6 +63,7 @@ const processor = {
 		), 0, 0);
 		document.body.appendChild(canvas);
 
+		this.templateImage = scaleImage(this.templateImage.data, this.templateImage.width, this.templateImage.height, 40,46);
 		console.log('... finished.');
 	},
 	analyzeImage(){
@@ -81,7 +82,6 @@ const processor = {
 			}
 		}
 		this.ctx.fillStyle = 'green';
-		
 		this.ctx.fillRect(best.x*4, best.y*4, this.templateImage.width*4, this.templateImage.height*4);
 		console.timeEnd('total');
 		console.log('...finished.');
@@ -129,16 +129,21 @@ function createTemplate(imgdata, xOffset, yOffset, width, height, mask) {
 	return { width: mask.width, height: mask.height, data: data };
 };
 
-function calculateSqDiff(imgdata, xOffset, yOffset, width, height, template, mask, best) {
+function calculateSqDiff(imgData, xOffset, yOffset, width, height, template, mask, best) {
 	let sum = 0;
 	for (let y = 0; y < template.height; ++y) {
 		for (let x = 0; x < template.width; ++x) {
 			let m = (y * template.width + x);
 			if (mask.data[m] === 1) {
+				let imgDataHSV, templateHSV;
 				let i = m * 4;
 				let j = ((y + yOffset) * width + (x + xOffset)) * 4;
-				sum += Math.pow(template.data[i] - imgdata[j] + template.data[i + 1] - imgdata[j + 1] + template.data[i + 2] - imgdata[j + 2], 2);
-				if (sum > best.value || sum > 100000000) {
+			 	templateHSV = (RGB2HSV(template.data[i], template.data[i+1],template.data[i+2]));
+				imgDataHSV = (RGB2HSV(imgData[j], imgData[j+1], imgData[j+2]));
+				//console.log(templateHSV);
+				//console.log(imgDataHSV);
+				sum += Math.pow(templateHSV[0] - imgDataHSV[0] + templateHSV[1] - imgDataHSV[1], 2);
+				if (sum > best.value || sum > 1000000000) {
 					return 999999999;
 				}
 			}
@@ -157,11 +162,43 @@ function scaleImage(imgDataScal, w1, h1, w2, h2){
 			px = ((i*scaleX)>>16);
 			py = ((j*scaleY)>>16);
 			idx = (py * w1 + px)*4;
-			out.push(imgDataScal[idx]);
-			out.push(imgDataScal[idx+1]);
-			out.push(imgDataScal[idx+2]);
-			out.push(imgDataScal[idx+3]);
+			out.push(imgDataScal[idx],imgDataScal[idx+1],imgDataScal[idx+2],imgDataScal[idx+3]);
 		}
 	}
 	return { width: w2, height: h2, data: out };
+};
+
+function RGB2HSV(r,g,b){
+	r = r/255;
+	g = g/255;
+	b = b/255;
+	let cMax = Math.max(r,g,b);
+	let cMin = Math.min(r,g,b);
+	let delta = cMax - cMin;
+	let h = 0, s = 0;
+
+	if(delta == 0){
+		h = 0;
+	}
+	else if(r >= cMax){
+		h = (g-b) / delta;
+	}
+	else if(g >= cMax){
+		h = (b - r) / delta + 2;
+	}
+	else if(b >= cMax){
+		h = (r - g) / delta + 4;
+	}
+	h *= 60;
+	if(cMax > 0){
+		s = delta / cMax;
+	}else {
+		s = 0;
+	}
+	v = cMax;
+	if(h <0){
+		h = 360 + h;
+	}
+
+	return [Math.floor(h),Math.floor(s*100)];
 };
