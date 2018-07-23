@@ -1,5 +1,6 @@
 /nbproject/private/
 nbproject
+/tests/node_modules
 build/*
 !build/.gitkeep
 
