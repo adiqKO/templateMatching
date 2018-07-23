@@ -1,0 +1,2 @@
+#!/bin/bash
+emcc -O2 -o ./build/c_functions.js ./src/c/functions.cxx -s EXPORTED_FUNCTIONS="['_convertRGBA2Luma']" -s EXTRA_EXPORTED_RUNTIME_METHODS="['cwrap', 'getValue']"
