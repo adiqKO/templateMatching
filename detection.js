@@ -1,9 +1,6 @@
 /*
 for chrome: --allow-file-access-from-files
 */
-const shapes = {
-
-};
 
 const EXTRACTION = 1;
 const ANALYSIS = 2;
@@ -81,7 +78,6 @@ const processor = {
 			}
 		}
 		this.ctx.fillStyle = 'green';
-		
 		this.ctx.fillRect(best.x*4, best.y*4, this.templateImage.width*4, this.templateImage.height*4);
 		console.timeEnd('total');
 		console.log('...finished.');
@@ -157,10 +153,7 @@ function scaleImage(imgDataScal, w1, h1, w2, h2){
 			px = ((i*scaleX)>>16);
 			py = ((j*scaleY)>>16);
 			idx = (py * w1 + px)*4;
-			out.push(imgDataScal[idx]);
-			out.push(imgDataScal[idx+1]);
-			out.push(imgDataScal[idx+2]);
-			out.push(imgDataScal[idx+3]);
+			out.push(imgDataScal[idx], imgDataScal[idx+1], imgDataScal[idx+2], imgDataScal[idx+3]);
 		}
 	}
 	return { width: w2, height: h2, data: out };
