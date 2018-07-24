@@ -49,7 +49,7 @@ const processor = {
 	template() {
 		console.log('Getting template...');
 		this.userImageData = this.ctx.getImageData(0, 0, this.width, this.height);
-		this.templateImage = createTemplate(this.userImageData.data, 240, 148, this.userImageData.width, this.userImageData.height, mask2);
+		this.templateImage = createTemplate(this.userImageData.data, 122, 148, this.userImageData.width, this.userImageData.height, mask2);
 		this.templateImage = scaleImage(this.templateImage.data, this.templateImage.width, this.templateImage.height, 40,46);
 		
 		let canvas = document.createElement('canvas');
@@ -85,7 +85,7 @@ const processor = {
 		this.ctx.fillRect(best.x*4, best.y*4, this.templateImage.width*4, this.templateImage.height*4);
 		console.timeEnd('total');
 		console.log('...finished.');
-		console.log(best);
+		console.log(best.value);
 	}
 };
 
@@ -138,7 +138,7 @@ function calculateSqDiff(imgdata, xOffset, yOffset, width, height, template, mas
 				let i = m * 4;
 				let j = ((y + yOffset) * width + (x + xOffset)) * 4;
 				sum += Math.pow(template.data[i] - imgdata[j] + template.data[i + 1] - imgdata[j + 1] + template.data[i + 2] - imgdata[j + 2], 2);
-				if (sum > best.value || sum > 100000000) {
+				if (sum > best.value || sum > 30000000) {
 					return 999999999;
 				}
 			}

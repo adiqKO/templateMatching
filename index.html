@@ -15,13 +15,22 @@
         }
 		.hand-outline {
 			position: absolute;
-			left: 240px;
+			left: 360px;
 			top: 148px;
 			background: url(hand-outline_160x184.png) transparent;
 			width: 160px;
 			height: 184px;
 			z-index: 1000;
 		}
+        .hand-mirror{
+            position: absolute;
+			left: 140px;
+			top: 148px;
+			background: url(hand-outline_160x184mirror.png) transparent;
+			width: 160px;
+			height: 184px;
+			z-index: 1000;
+        }
        video{
             transform: rotateY(180deg);
             -webkit-transform:rotateY(180deg); /* Safari and Chrome */
@@ -32,6 +41,7 @@
 <body>
     <video autoplay></video>
     <div class="hand-outline"></div>
+    <div class="hand-mirror"></div>
     <script src="maskArray0.25.js"></script>
     <script src="maskArray.js"></script>
     <script src="detection.js"></script>
