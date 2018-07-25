@@ -46,42 +46,64 @@ const processor = {
 	template() {
 		console.log('Getting template...');
 		this.userImageData = this.ctx.getImageData(0, 0, this.width, this.height);
+		this.templateMirror = createTemplate(this.userImageData.data, 340, 148, this.userImageData.width, this.userImageData.height, mask5);
 		this.templateImage = createTemplate(this.userImageData.data, 122, 148, this.userImageData.width, this.userImageData.height, mask2);
-		this.templateImage = scaleImage(this.templateImage.data, this.templateImage.width, this.templateImage.height, 40,46);
-		
+		this.modifiedImage = scaleImage(this.templateImage.data, this.templateImage.width, this.templateImage.height, 40,46);
+		this.modifiedMirror = scaleImage(this.templateMirror.data, this.templateMirror.width, this.templateMirror.height, 40,46);
+
 		let canvas = document.createElement('canvas');
-        canvas.width  = this.templateImage.width;
-		canvas.height = this.templateImage.height;
+        canvas.width  = this.modifiedMirror.width+this.modifiedImage.width;
+		canvas.height = this.modifiedMirror.height;
 		let context = canvas.getContext('2d');
 		context.putImageData(new ImageData(
-			Uint8ClampedArray.from(this.templateImage.data),
-			this.templateImage.width,
-			this.templateImage.height
+			Uint8ClampedArray.from(this.modifiedMirror.data),
+			this.modifiedMirror.width,
+			this.modifiedMirror.height
 		), 0, 0);
+		context.putImageData(new ImageData(
+			Uint8ClampedArray.from(this.modifiedImage.data),
+			this.modifiedImage.width,
+			this.modifiedImage.height
+		), this.modifiedMirror.width, 0);
 		document.body.appendChild(canvas);
 
 		console.log('... finished.');
 	},
 	analyzeImage(){
 		let userImageData2 = this.ctx.getImageData(0, 0, this.width, this.height);
-		userImageData2 = scaleImage(userImageData2.data, userImageData2.width, userImageData2.height, 160, 120);
-
+		userImageData2 = scaleImage(userImageData2.data, userImageData2.width, userImageData2.height, 160, 120); 
 		console.log('Analysing...');
 		console.time('total');
 		let best = { x: null, y: null, value: 999999999 };
-		for (let y = 0; y < userImageData2.height - this.templateImage.height + 1; ++y) {
-			for (let x = 0; x <userImageData2.width - this.templateImage.width + 1; ++x) {
-				let value = calculateSqDiff(userImageData2.data, x, y, userImageData2.width, userImageData2.height, this.templateImage, mask3, best);
+		let best2 = { x: null, y: null, value: 999999999 };
+		for (let y = 0; y < userImageData2.height - this.modifiedImage.height + 1; ++y) {
+			for (let x = 0; x <userImageData2.width - this.modifiedImage.width + 1; ++x) {
+				let value = calculateSqDiff(userImageData2.data, x, y, userImageData2.width, userImageData2.height, this.modifiedImage, mask3, best);
+				let value2 = calculateSqDiff(userImageData2.data, x, y, userImageData2.width, userImageData2.height, this.modifiedMirror, maskMirror, best2);
 				if (best.x === null || value < best.value) {
 					best = { x: x, y: y, value: value };
+			}
+				if (best2.x === null || value2 < best2.value) {
+					best2 = { x: x, y: y, value: value2 };
 				}
 			}
 		}
 		this.ctx.fillStyle = 'green';
-		this.ctx.fillRect(best.x*4, best.y*4, this.templateImage.width*4, this.templateImage.height*4);
+	/*	if(best.value<best2.value){
+			this.ctx.fillRect(best.x*4, best.y*4, this.modifiedImage.width*4, this.modifiedImage.height*4);
+			console.log(1);
+		}
+		else if(best2.value<best.value){
+			this.ctx.fillRect(best2.x*4, best2.y*4, this.modifiedMirror.width*4, this.modifiedMirror.height*4);
+			console.log(2);
+		}*/
+		this.ctx.fillRect(best.x*4, best.y*4, this.modifiedImage.width*4, this.modifiedImage.height*4);
+		this.ctx.fillRect(best2.x*4, best2.y*4, this.modifiedMirror.width*4, this.modifiedMirror.height*4);
+
 		console.timeEnd('total');
 		console.log('...finished.');
-		console.log(best.value);
+		console.log(best.value); 
+		console.log(best2.value); 
 	}
 };
 
@@ -158,3 +180,27 @@ function scaleImage(imgDataScal, w1, h1, w2, h2){
 	}
 	return { width: w2, height: h2, data: out };
 };
+
+function importMask(width, height){
+	let data ;
+	var mask = new Image(width, height);
+	mask.src = 'C:/Users/Daily/Desktop/TemplateMain/templateMatching/hand-mask_160x184.png';
+	//mask.setAttribute('crossOrigin', '');
+	//mask.crossOrigin = 'anonymous'
+	let canvas = document.createElement('canvas');
+	//canvas.crossOrigin = 'anonymous'
+	canvas.width  = width;
+	canvas.height = height;
+	let context = canvas.getContext('2d');
+	mask.onload = function(){
+		context.drawImage(mask, 0, 0);
+		
+	  }
+	  setTimeout(() => {
+		data = context.getImageData(0, 0, width, height);
+	},100);
+	console.log(context);
+	
+	console.log(data);
+	document.body.appendChild(canvas);
+}
