@@ -46,8 +46,8 @@ const processor = {
 	template() {
 		console.log('Getting template...');
 		this.userImageData = this.ctx.getImageData(0, 0, this.width, this.height);
-		this.templateMirror = createTemplate(this.userImageData.data, 340, 148, this.userImageData.width, this.userImageData.height, mask5);
-		this.templateImage = createTemplate(this.userImageData.data, 122, 148, this.userImageData.width, this.userImageData.height, mask2);
+		this.templateMirror = createTemplate(this.userImageData.data, 340, 148, this.userImageData.width, this.userImageData.height, maskMirror);
+		this.templateImage = createTemplate(this.userImageData.data, 122, 148, this.userImageData.width, this.userImageData.height, mask);
 		this.modifiedImage = scaleImage(this.templateImage.data, this.templateImage.width, this.templateImage.height, 40,46);
 		this.modifiedMirror = scaleImage(this.templateMirror.data, this.templateMirror.width, this.templateMirror.height, 40,46);
 
@@ -78,8 +78,8 @@ const processor = {
 		let best2 = { x: null, y: null, value: 999999999 };
 		for (let y = 0; y < userImageData2.height - this.modifiedImage.height + 1; ++y) {
 			for (let x = 0; x <userImageData2.width - this.modifiedImage.width + 1; ++x) {
-				let value = calculateSqDiff(userImageData2.data, x, y, userImageData2.width, userImageData2.height, this.modifiedImage, mask3, best);
-				let value2 = calculateSqDiff(userImageData2.data, x, y, userImageData2.width, userImageData2.height, this.modifiedMirror, maskMirror, best2);
+				let value = calculateSqDiff(userImageData2.data, x, y, userImageData2.width, userImageData2.height, this.modifiedImage, maskMirror25, best);
+				let value2 = calculateSqDiff(userImageData2.data, x, y, userImageData2.width, userImageData2.height, this.modifiedMirror, mask25, best2);
 				if (best.x === null || value < best.value) {
 					best = { x: x, y: y, value: value };
 			}
@@ -89,21 +89,21 @@ const processor = {
 			}
 		}
 		this.ctx.fillStyle = 'green';
-	/*	if(best.value<best2.value){
+		if(best.value<best2.value){
 			this.ctx.fillRect(best.x*4, best.y*4, this.modifiedImage.width*4, this.modifiedImage.height*4);
-			console.log(1);
+			//console.log("Right Hand");
+			this.ctx.fillStyle = 'white';
+			this.ctx.fillText("Right Hand",best.x*4+20, best.y*4+20)
 		}
 		else if(best2.value<best.value){
 			this.ctx.fillRect(best2.x*4, best2.y*4, this.modifiedMirror.width*4, this.modifiedMirror.height*4);
-			console.log(2);
-		}*/
-		this.ctx.fillRect(best.x*4, best.y*4, this.modifiedImage.width*4, this.modifiedImage.height*4);
-		this.ctx.fillRect(best2.x*4, best2.y*4, this.modifiedMirror.width*4, this.modifiedMirror.height*4);
+			//console.log("Left Hand");
+			this.ctx.fillStyle = 'white';
+			this.ctx.fillText("Left Hand",best2.x*4+20, best2.y*4+20)
+		}
 
 		console.timeEnd('total');
 		console.log('...finished.');
-		console.log(best.value); 
-		console.log(best2.value); 
 	}
 };
 
