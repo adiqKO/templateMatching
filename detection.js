@@ -1,6 +1,11 @@
 /*
 for chrome: --allow-file-access-from-files
 */
+let leftPikachu = 440;
+let topPikachu= 250;
+let leftBulbasar = 60;
+let topBulbasar = 250;
+let activeObject = false;
 
 const EXTRACTION = 1;
 const ANALYSIS = 2;
@@ -39,8 +44,8 @@ const processor = {
 					setTimeout(() => {
 						self.timer();
 					}, 10);
-				}, 290);
-			}, 700);
+				}, 200);
+			}, 400);
 		}
 	},
 	template() {
@@ -50,26 +55,22 @@ const processor = {
 		this.templateImage = createTemplate(this.userImageData.data, 122, 148, this.userImageData.width, this.userImageData.height, mask);
 		this.modifiedImage = scaleImage(this.templateImage.data, this.templateImage.width, this.templateImage.height, 40,46);
 		this.modifiedMirror = scaleImage(this.templateMirror.data, this.templateMirror.width, this.templateMirror.height, 40,46);
-
-		let canvas = document.createElement('canvas');
-        canvas.width  = this.modifiedMirror.width+this.modifiedImage.width;
-		canvas.height = this.modifiedMirror.height;
-		let context = canvas.getContext('2d');
-		context.putImageData(new ImageData(
-			Uint8ClampedArray.from(this.modifiedMirror.data),
-			this.modifiedMirror.width,
-			this.modifiedMirror.height
-		), 0, 0);
-		context.putImageData(new ImageData(
-			Uint8ClampedArray.from(this.modifiedImage.data),
-			this.modifiedImage.width,
-			this.modifiedImage.height
-		), this.modifiedMirror.width, 0);
-		document.body.appendChild(canvas);
-
 		console.log('... finished.');
+		const outlineHand = document.getElementById('outlineHand');
+		outlineHand.style.visibility = 'hidden';
+		const outlineMirror = document.getElementById('outlineMirror');
+		outlineMirror.style.visibility = 'hidden';
 	},
 	analyzeImage(){
+		if(!activeObject){
+			let randomValue = Math.random();
+			if(randomValue > 0.5){
+				initObject('pikachuObject', topPikachu, leftPikachu);
+			}
+			else{
+				initObject('bulbasaurObject', topBulbasar, leftBulbasar);
+			}
+		}
 		let userImageData2 = this.ctx.getImageData(0, 0, this.width, this.height);
 		userImageData2 = scaleImage(userImageData2.data, userImageData2.width, userImageData2.height, 160, 120); 
 		console.log('Analysing...');
@@ -91,19 +92,26 @@ const processor = {
 		this.ctx.fillStyle = 'green';
 		if(best.value<best2.value){
 			this.ctx.fillRect(best.x*4, best.y*4, this.modifiedImage.width*4, this.modifiedImage.height*4);
-			//console.log("Right Hand");
 			this.ctx.fillStyle = 'white';
 			this.ctx.fillText("Right Hand",best.x*4+20, best.y*4+20)
+
+			if(best.x*4 <= (640-(leftPikachu+100)) && best.x*4 >= (640-(leftPikachu + 180))){
+				hiddenObject('pikachuObject');
+			}
 		}
 		else if(best2.value<best.value){
 			this.ctx.fillRect(best2.x*4, best2.y*4, this.modifiedMirror.width*4, this.modifiedMirror.height*4);
-			//console.log("Left Hand");
 			this.ctx.fillStyle = 'white';
 			this.ctx.fillText("Left Hand",best2.x*4+20, best2.y*4+20)
-		}
 
+			if(best2.x*4 <= (640-(leftBulbasar+100)) && best2.x*4 >= (640-(leftBulbasar + 180))){
+				hiddenObject('bulbasaurObject');
+			}
+		}
 		console.timeEnd('total');
 		console.log('...finished.');
+		console.log(best.value);
+		console.log(best2.value);
 	}
 };
 
@@ -156,7 +164,7 @@ function calculateSqDiff(imgdata, xOffset, yOffset, width, height, template, mas
 				let i = m * 4;
 				let j = ((y + yOffset) * width + (x + xOffset)) * 4;
 				sum += Math.pow(template.data[i] - imgdata[j] + template.data[i + 1] - imgdata[j + 1] + template.data[i + 2] - imgdata[j + 2], 2);
-				if (sum > best.value || sum > 30000000) {
+				if (sum > best.value || sum > 10000000) {
 					return 999999999;
 				}
 			}
@@ -203,4 +211,18 @@ function importMask(width, height){
 	
 	console.log(data);
 	document.body.appendChild(canvas);
+}
+
+function initObject(path, topOffset, leftOffset){
+	const characterObject = document.getElementById(path);
+	characterObject.style.left = leftOffset +'px';
+	characterObject.style.top = topOffset + 'px';
+	characterObject.style.visibility = 'visible';
+	activeObject = true;
+}	
+
+function hiddenObject(path){
+	const characterObject = document.getElementById(path);
+	characterObject.style.visibility = 'hidden';
+	activeObject = false;
 }

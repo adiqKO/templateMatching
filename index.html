@@ -31,7 +31,23 @@
 			height: 184px;
 			z-index: 1000;
         }
-       video{
+        #pikachuObject{
+            position: absolute;
+			background: url(pikachu160x172.png) transparent;
+			width: 160px;
+			height: 172px;
+			z-index: 1000;
+            visibility: hidden;
+        }
+        #bulbasaurObject{
+            position: absolute;
+			background: url(bulbasaur160x160.png) transparent;
+			width: 160px;
+			height: 160px;
+			z-index: 1000;
+            visibility: hidden;
+        }
+        video{
             transform: rotateY(180deg);
             -webkit-transform:rotateY(180deg); /* Safari and Chrome */
            -moz-transform:rotateY(180deg); /* Firefox */
@@ -40,8 +56,10 @@
 </head>
 <body>
     <video autoplay></video>
-    <div class="hand-outline"></div>
-    <div class="hand-mirror"></div>
+    <div class="hand-outline" id='outlineHand'></div>
+    <div class="hand-mirror" id='outlineMirror'></div>
+    <div id='bulbasaurObject'></div>
+    <div id='pikachuObject'></div>
     <script src="mask.js"></script>
     <script src="maskMirror.js"></script>
     <script src="mask0.25.js"></script>
